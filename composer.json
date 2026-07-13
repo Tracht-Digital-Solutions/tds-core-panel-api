@@ -1,0 +1,42 @@
+{
+  "name": "tracht-digital-solutions/tds-core-panel-api",
+  "description": "Base panel API kernel (PHP 8 + Slim). Composes extension Modules in-process via panel-contract into one app — the backend twin of core-panel-frontend.",
+  "type": "project",
+  "license": "proprietary",
+  "version": "0.1.0",
+  "require": {
+    "php": ">=8.1",
+    "slim/slim": "^4.13",
+    "slim/psr7": "^1.6",
+    "php-di/php-di": "^7.0",
+    "vlucas/phpdotenv": "^5.6",
+    "tracht-digital-solutions/tds-panel-contract": "*",
+    "tracht-digital-solutions/tds-ext-time-tracker": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5"
+  },
+  "repositories": [
+    { "type": "path", "url": "../tds-panel-contract" },
+    { "type": "path", "url": "../tds-ext-time-tracker" }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tds\\CorePanelApi\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tds\\CorePanelApi\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "preferred-install": "dist"
+  },
+  "scripts": {
+    "start": "php -S localhost:8100 -t public public/router.php",
+    "test": "phpunit"
+  }
+}

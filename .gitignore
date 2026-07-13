@@ -1,0 +1,17 @@
+vendor/
+.env
+*.log
+.DS_Store
+.vscode/
+.idea/
+.phpunit.cache/
+.phpunit.result.cache
+composer.lock
+
+# Windows OS files
+Thumbs.db
+Desktop.ini
+
+# Editor backups
+*.swp
+*~
