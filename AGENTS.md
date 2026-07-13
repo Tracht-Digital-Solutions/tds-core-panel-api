@@ -33,9 +33,19 @@ One PHP-FPM app, no service processes. The base ships only kernel routes
 - **`Mailer`** (panel-contract) — SMTP via Symfony Mailer when `MAIL_DSN` is set,
   else `NullMailer` (`isConfigured()` false). From identity is core-owned
   (`MAIL_FROM`/`MAIL_FROM_NAME`); no extension configures its own SMTP.
-- **`UserContext`** (panel-contract) — the request principal. Currently
-  `AnonymousUserContext`; the JWT/JWKS auth port replaces this binding with a
-  request-scoped context from the verified token (TODO, next).
+- **`UserContext`** (panel-contract) — the request principal, populated by
+  `AuthMiddleware` from the verified RS256 JWT (`Auth\JwksClient` against
+  tds-auth-api's JWKS). Maps admin/uid + the multi-company claims + the
+  `X-Act-As-Customer` header to `isAdmin`/`userId`/`permissions`/`activeCompanyId`
+  (see `Support\JwtUserContext`). Auth is centralized here — **modules read the
+  UserContext, never verify a token themselves**.
+
+`AuthMiddleware` is **non-gating**: it sets the principal (Jwt or anonymous) and
+hands off; routes/modules enforce their own auth via the context (a
+RequirePermission middleware or in-action checks). It rebinds `UserContext` on the
+shared container per request — safe in the in-process (one-request-per-worker)
+model. Unset `AUTH_API_URL` → no verifier → every request anonymous (boot/dev
+works without auth-api).
 
 ## Enabling a module
 

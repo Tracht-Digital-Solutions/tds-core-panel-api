@@ -5,6 +5,7 @@ namespace Tds\CorePanelApi;
 
 use DI\Container;
 use Dotenv\Dotenv;
+use GuzzleHttp\Client as GuzzleClient;
 use PDO;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -12,6 +13,9 @@ use Slim\App;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\Transport;
+use Tds\CorePanelApi\Auth\JwksClient;
+use Tds\CorePanelApi\Auth\TokenVerifier;
+use Tds\CorePanelApi\Middleware\AuthMiddleware;
 use Tds\CorePanelApi\Middleware\CorsMiddleware;
 use Tds\CorePanelApi\Service\NullMailer;
 use Tds\CorePanelApi\Service\SmtpMailer;
@@ -39,11 +43,15 @@ final class Bootstrap
 
         // DI container of the core services extensions may resolve (Mailer /
         // UserContext / PDO). Modules reach them via $app->getContainer().
-        AppFactory::setContainer(self::container());
+        $container = self::container();
+        AppFactory::setContainer($container);
         $app = AppFactory::create();
         $app->addBodyParsingMiddleware();
         $app->addRoutingMiddleware();
         $app->addErrorMiddleware(self::env('APP_ENV', 'production') !== 'production', true, true);
+        // Auth populates the request principal (UserContext) each request; it
+        // does NOT gate — routes/modules enforce via the resolved context.
+        $app->add(new AuthMiddleware($container, self::tokenVerifier($rootDir)));
         // Slim middleware is LIFO — the LAST added runs FIRST. CORS must be
         // added after routing so it is outermost; otherwise routing 405s an
         // OPTIONS preflight (no OPTIONS routes) before CORS can short-circuit
@@ -117,11 +125,29 @@ final class Bootstrap
             );
         });
 
-        // Authenticated principal. Anonymous for now; the JWT/JWKS auth port
-        // replaces this binding with a request-scoped JwtUserContext.
+        // The default binding is anonymous; AuthMiddleware rebinds it per
+        // request to a JwtUserContext when a valid token is presented.
         $container->set(UserContext::class, static fn (): UserContext => new AnonymousUserContext());
 
         return $container;
+    }
+
+    /**
+     * The JWKS token verifier, or null when auth is unconfigured (`AUTH_API_URL`
+     * unset — local dev / boot) so every request is anonymous rather than 500ing.
+     */
+    private static function tokenVerifier(string $rootDir): ?TokenVerifier
+    {
+        $authUrl = self::env('AUTH_API_URL', '');
+        if ($authUrl === '') {
+            return null;
+        }
+        return new JwksClient(
+            new GuzzleClient(['timeout' => 5]),
+            rtrim($authUrl, '/') . '/.well-known/jwks.json',
+            $rootDir . '/var/cache',
+            (int) self::env('JWKS_CACHE_TTL', '600'),
+        );
     }
 
     /**
