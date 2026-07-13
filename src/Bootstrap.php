@@ -3,13 +3,22 @@ declare(strict_types=1);
 
 namespace Tds\CorePanelApi;
 
+use DI\Container;
 use Dotenv\Dotenv;
+use PDO;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Symfony\Component\Mailer\Mailer as SymfonyMailer;
+use Symfony\Component\Mailer\Transport;
 use Tds\CorePanelApi\Middleware\CorsMiddleware;
+use Tds\CorePanelApi\Service\NullMailer;
+use Tds\CorePanelApi\Service\SmtpMailer;
+use Tds\CorePanelApi\Support\AnonymousUserContext;
+use Tds\Panel\Contract\Mailer;
 use Tds\Panel\Contract\ModuleRegistry;
+use Tds\Panel\Contract\UserContext;
 
 /**
  * Wires the base panel API: env, Slim app, middleware, base routes, and the
@@ -28,6 +37,9 @@ final class Bootstrap
             Dotenv::createImmutable($rootDir)->load();
         }
 
+        // DI container of the core services extensions may resolve (Mailer /
+        // UserContext / PDO). Modules reach them via $app->getContainer().
+        AppFactory::setContainer(self::container());
         $app = AppFactory::create();
         $app->addBodyParsingMiddleware();
         $app->addRoutingMiddleware();
@@ -66,6 +78,50 @@ final class Bootstrap
         });
 
         return $app;
+    }
+
+    /**
+     * The DI container of core services exposed to modules. All bindings are
+     * lazy so boot stays side-effect-free (no DB connect, no SMTP handshake).
+     */
+    private static function container(): Container
+    {
+        $container = new Container();
+
+        // Shared DB connection (extensions store their own tables through it).
+        $container->set(PDO::class, static function (): PDO {
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+                self::env('DB_HOST', '127.0.0.1'),
+                self::env('DB_PORT', '3306'),
+                self::env('DB_NAME', ''),
+            );
+            return new PDO($dsn, self::env('DB_USER', ''), self::env('DB_PASS', ''), [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        });
+
+        // Core SMTP mailer. Unconfigured (no MAIL_DSN) → a no-op mailer, so a
+        // module can call send() unconditionally. Config + From live here only.
+        $container->set(Mailer::class, static function (): Mailer {
+            $dsn = self::env('MAIL_DSN', '');
+            if ($dsn === '') {
+                return new NullMailer();
+            }
+            return new SmtpMailer(
+                new SymfonyMailer(Transport::fromDsn($dsn)),
+                self::env('MAIL_FROM', 'no-reply@tracht-digital.de'),
+                self::env('MAIL_FROM_NAME', 'Tracht Digital Solutions'),
+            );
+        });
+
+        // Authenticated principal. Anonymous for now; the JWT/JWKS auth port
+        // replaces this binding with a request-scoped JwtUserContext.
+        $container->set(UserContext::class, static fn (): UserContext => new AnonymousUserContext());
+
+        return $container;
     }
 
     /**

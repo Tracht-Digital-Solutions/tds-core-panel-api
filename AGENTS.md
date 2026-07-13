@@ -25,6 +25,18 @@ One PHP-FPM app, no service processes. The base ships only kernel routes
   prefixes with its module id; the base only aggregates the paths.
 - **`php -S` needs `public/router.php`** (built-in server 404s dotted paths).
 
+## Core services for modules
+
+`Bootstrap::container()` binds the services extensions resolve via
+`$app->getContainer()->get(...)` — all lazy (boot does no DB/SMTP work):
+- **`PDO`** — the shared DB connection (env `DB_*`).
+- **`Mailer`** (panel-contract) — SMTP via Symfony Mailer when `MAIL_DSN` is set,
+  else `NullMailer` (`isConfigured()` false). From identity is core-owned
+  (`MAIL_FROM`/`MAIL_FROM_NAME`); no extension configures its own SMTP.
+- **`UserContext`** (panel-contract) — the request principal. Currently
+  `AnonymousUserContext`; the JWT/JWKS auth port replaces this binding with a
+  request-scoped context from the verified token (TODO, next).
+
 ## Enabling a module
 
 Add `new SomeModule()` to `Modules::enabled()` and add the extension's Composer
