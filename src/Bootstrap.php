@@ -85,6 +85,42 @@ final class Bootstrap
             return $response->withHeader('Content-Type', 'application/json');
         });
 
+        // In-panel API wiki: the full route map of the base + every composed
+        // module, introspected from the registered Slim routes at request time
+        // (so all modules are present). Admin-only; the panel Wiki page renders
+        // it. Auto-generated — new module routes appear without touching the UI.
+        $app->get('/wiki.json', function (Request $request, Response $response) use ($app, $registry): Response {
+            $user = $app->getContainer()?->get(UserContext::class);
+            if ($user === null || !$user->isAdmin()) {
+                $response->getBody()->write(json_encode(['error' => 'Forbidden'], JSON_THROW_ON_ERROR));
+                return $response->withStatus($user === null || !$user->isAuthenticated() ? 401 : 403)
+                    ->withHeader('Content-Type', 'application/json');
+            }
+            $routes = [];
+            foreach ($app->getRouteCollector()->getRoutes() as $route) {
+                $pattern = $route->getPattern();
+                foreach ($route->getMethods() as $method) {
+                    if ($method === 'HEAD' || $method === 'OPTIONS') {
+                        continue;
+                    }
+                    $group = explode('/', ltrim($pattern, '/'))[0];
+                    $routes[] = [
+                        'method' => $method,
+                        'pattern' => $pattern,
+                        'group' => $group === '' ? 'root' : $group,
+                    ];
+                }
+            }
+            usort($routes, static fn (array $a, array $b): int =>
+                [$a['group'], $a['pattern'], $a['method']] <=> [$b['group'], $b['pattern'], $b['method']]);
+            $response->getBody()->write(json_encode([
+                'generated_at' => date('c'),
+                'modules' => $registry->order(),
+                'routes' => $routes,
+            ], JSON_THROW_ON_ERROR));
+            return $response->withHeader('Content-Type', 'application/json');
+        });
+
         return $app;
     }
 

@@ -48,4 +48,13 @@ final class CompositionTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('weekHours', (string) $response->getBody());
     }
+
+    public function testWikiJsonRequiresAdmin(): void
+    {
+        // No token → anonymous → 401 (the admin route map is not public). The
+        // admin 200 path needs a real JWT, out of scope for the no-DB suite.
+        $app = Bootstrap::createApp(dirname(__DIR__));
+        $response = $app->handle((new ServerRequestFactory())->createServerRequest('GET', '/wiki.json'));
+        self::assertSame(401, $response->getStatusCode());
+    }
 }
