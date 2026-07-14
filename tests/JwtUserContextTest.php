@@ -14,11 +14,12 @@ final class JwtUserContextTest extends TestCase
 {
     public function testAdminBypassesPermissionsAndActsAsHeaderCompany(): void
     {
-        $ctx = new JwtUserContext(['admin' => true, 'uid' => 7], '42');
+        $ctx = new JwtUserContext(['admin' => true, 'uid' => 7, 'email' => 'a@x.de'], '42');
 
         self::assertTrue($ctx->isAuthenticated());
         self::assertTrue($ctx->isAdmin());
         self::assertSame(7, $ctx->userId());
+        self::assertSame('a@x.de', $ctx->email());
         self::assertTrue($ctx->has('anything:at-all')); // admin bypass
         self::assertSame(42, $ctx->activeCompanyId());  // acts as the header company
     }

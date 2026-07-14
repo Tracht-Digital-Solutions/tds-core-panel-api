@@ -20,6 +20,7 @@ final class JwtUserContext implements UserContext
 {
     private readonly bool $admin;
     private readonly ?int $userId;
+    private readonly ?string $email;
     private readonly ?int $activeCompanyId;
     /** @var string[] */
     private readonly array $permissionList;
@@ -31,6 +32,9 @@ final class JwtUserContext implements UserContext
 
         $uid = $claims['uid'] ?? $claims['sub'] ?? null;
         $this->userId = is_numeric($uid) ? (int) $uid : null;
+
+        $mail = $claims['email'] ?? null;
+        $this->email = is_string($mail) && $mail !== '' ? $mail : null;
 
         $companies = self::companies($claims);
         if ($this->admin) {
@@ -51,6 +55,11 @@ final class JwtUserContext implements UserContext
     public function userId(): ?int
     {
         return $this->userId;
+    }
+
+    public function email(): ?string
+    {
+        return $this->email;
     }
 
     public function isAdmin(): bool

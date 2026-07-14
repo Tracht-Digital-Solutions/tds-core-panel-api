@@ -22,6 +22,11 @@ final class AnonymousUserContext implements UserContext
         return null;
     }
 
+    public function email(): ?string
+    {
+        return null;
+    }
+
     public function isAdmin(): bool
     {
         return false;
