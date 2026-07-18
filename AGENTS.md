@@ -8,8 +8,21 @@ repo consumes that contract's PHP half (`Module` + `ModuleRegistry`).
 In-process composition, like the gateway: `Modules::enabled()` returns the
 extension `Module`s for this build; `Bootstrap` composes them through a
 `ModuleRegistry` (dependency-ordered, collision-checked) and mounts their routes.
-One PHP-FPM app, no service processes. The base ships only kernel routes
-(`/healthz`, `/admin/permissions`); it MUST boot with zero modules.
+One PHP-FPM app, no service processes. The base ships the kernel routes
+(`/healthz`, `/admin/permissions`, `/wiki.json`, `/me/dashboard-layout`); it MUST
+boot with zero modules.
+
+## Base-service data (per-user dashboard layout)
+
+`GET`/`PUT /me/dashboard-layout` persist each authenticated user's dashboard
+widget arrangement (which widgets show + order), keyed by the JWT `userId` — no
+admin gate, a user manages their own. `Domain\DashboardLayoutRepository` owns the
+`user_dashboard_layout` table (`user_id`×`widget_id`, `visible`, `sort`). PUT
+replaces the whole layout (order = array position → `sort`), validating widget ids
+against `^[a-z0-9:_-]{1,64}$`. **The core has no Phinx migration runner yet** (it
+lands with the assemble pipeline), so this base table **self-bootstraps**: an
+idempotent `CREATE TABLE IF NOT EXISTS` runs once per process. When the migrator
+lands, move that DDL into a base migration and drop `ensureSchema()`.
 
 ## Load-bearing gotchas (carried from the four APIs)
 

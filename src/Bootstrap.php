@@ -15,6 +15,7 @@ use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\Transport;
 use Tds\CorePanelApi\Auth\JwksClient;
 use Tds\CorePanelApi\Auth\TokenVerifier;
+use Tds\CorePanelApi\Domain\DashboardLayoutRepository;
 use Tds\CorePanelApi\Middleware\AuthMiddleware;
 use Tds\CorePanelApi\Middleware\CorsMiddleware;
 use Tds\CorePanelApi\Service\NullMailer;
@@ -82,6 +83,54 @@ final class Bootstrap
                 $registry->permissions(),
             );
             $response->getBody()->write(json_encode($permissions, JSON_THROW_ON_ERROR));
+            return $response->withHeader('Content-Type', 'application/json');
+        });
+
+        // --- Per-user dashboard layout (base service) ---------------------------
+        // Any authenticated principal manages their own widget layout (which
+        // widgets show + order). Keyed by the JWT user id — no admin gate.
+        $app->get('/me/dashboard-layout', function (Request $request, Response $response) use ($container): Response {
+            $user = $container->get(UserContext::class);
+            if (!$user->isAuthenticated() || $user->userId() === null) {
+                $response->getBody()->write(json_encode(['error' => 'Unauthorized'], JSON_THROW_ON_ERROR));
+                return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+            }
+            $layout = $container->get(DashboardLayoutRepository::class)->get((int) $user->userId());
+            $response->getBody()->write(json_encode(['layout' => $layout], JSON_THROW_ON_ERROR));
+            return $response->withHeader('Content-Type', 'application/json');
+        });
+
+        $app->put('/me/dashboard-layout', function (Request $request, Response $response) use ($container): Response {
+            $user = $container->get(UserContext::class);
+            if (!$user->isAuthenticated() || $user->userId() === null) {
+                $response->getBody()->write(json_encode(['error' => 'Unauthorized'], JSON_THROW_ON_ERROR));
+                return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+            }
+            $body = (array) $request->getParsedBody();
+            $raw = $body['layout'] ?? null;
+            if (!is_array($raw)) {
+                $response->getBody()->write(json_encode(['error' => 'layout (array) is required'], JSON_THROW_ON_ERROR));
+                return $response->withStatus(422)->withHeader('Content-Type', 'application/json');
+            }
+            $items = [];
+            $sort = 0;
+            foreach ($raw as $entry) {
+                if (!is_array($entry)) {
+                    continue;
+                }
+                $widgetId = trim((string) ($entry['widget_id'] ?? ''));
+                // Widget ids are stable kebab/colon slugs — reject anything else.
+                if (preg_match('/^[a-z0-9:_-]{1,64}$/', $widgetId) !== 1) {
+                    continue;
+                }
+                $items[] = [
+                    'widget_id' => $widgetId,
+                    'visible' => (bool) ($entry['visible'] ?? true),
+                    'sort' => $sort++,
+                ];
+            }
+            $container->get(DashboardLayoutRepository::class)->save((int) $user->userId(), $items);
+            $response->getBody()->write(json_encode(['ok' => true, 'count' => count($items)], JSON_THROW_ON_ERROR));
             return $response->withHeader('Content-Type', 'application/json');
         });
 
@@ -164,6 +213,10 @@ final class Bootstrap
         // The default binding is anonymous; AuthMiddleware rebinds it per
         // request to a JwtUserContext when a valid token is presented.
         $container->set(UserContext::class, static fn (): UserContext => new AnonymousUserContext());
+
+        // Base-service per-user dashboard layout store (lazy — no DB on boot).
+        $container->set(DashboardLayoutRepository::class, static fn ($c): DashboardLayoutRepository =>
+            new DashboardLayoutRepository($c->get(PDO::class)));
 
         return $container;
     }

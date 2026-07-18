@@ -57,4 +57,17 @@ final class CompositionTest extends TestCase
         $response = $app->handle((new ServerRequestFactory())->createServerRequest('GET', '/wiki.json'));
         self::assertSame(401, $response->getStatusCode());
     }
+
+    public function testDashboardLayoutRequiresAuth(): void
+    {
+        // No token → anonymous → 401 on both read and write, before any DB touch.
+        $app = Bootstrap::createApp(dirname(__DIR__));
+        self::assertSame(401, $app->handle(
+            (new ServerRequestFactory())->createServerRequest('GET', '/me/dashboard-layout')
+        )->getStatusCode());
+        self::assertSame(401, $app->handle(
+            (new ServerRequestFactory())->createServerRequest('PUT', '/me/dashboard-layout')
+                ->withParsedBody(['layout' => []])
+        )->getStatusCode());
+    }
 }
