@@ -14,7 +14,7 @@ One PHP-FPM app, no service processes. The base ships the kernel routes
 
 ## Runtime settings store
 
-`Service\SettingsStore` (bound in the container, resolvable by modules) is a
+`Service\SettingsStore` (bound in the container, resolvable by modules via the contract `SettingsStore` interface) is a
 namespaced key/value store so third-party config (DeepL keys, rebuild tokens, …)
 is panel-editable instead of `.env`-only. **Read pattern for consumers: DB-first
 with env fallback** — a non-empty stored value wins, else the env var, else a

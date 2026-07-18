@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tds\CorePanelApi\Service;
 
 use PDO;
+use Tds\Panel\Contract\SettingsStore as SettingsStoreContract;
 
 /**
  * Runtime settings store — a generic namespaced key/value table so third-party
@@ -24,7 +25,7 @@ use PDO;
  * Namespaces are per-extension (e.g. `blog-cms`, `website-cms`), keeping keys
  * from colliding across extensions that share this one table.
  */
-final class SettingsStore
+final class SettingsStore implements SettingsStoreContract
 {
     private static bool $schemaEnsured = false;
 

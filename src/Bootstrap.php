@@ -24,6 +24,7 @@ use Tds\CorePanelApi\Service\SmtpMailer;
 use Tds\CorePanelApi\Support\AnonymousUserContext;
 use Tds\Panel\Contract\Mailer;
 use Tds\Panel\Contract\ModuleRegistry;
+use Tds\Panel\Contract\SettingsStore as SettingsStoreContract;
 use Tds\Panel\Contract\UserContext;
 
 /**
@@ -145,7 +146,7 @@ final class Bootstrap
                 $response->getBody()->write(json_encode(['error' => 'Forbidden'], JSON_THROW_ON_ERROR));
                 return $response->withStatus($user->isAuthenticated() ? 403 : 401)->withHeader('Content-Type', 'application/json');
             }
-            $settings = $container->get(SettingsStore::class)->allMasked((string) $args['ns']);
+            $settings = $container->get(SettingsStoreContract::class)->allMasked((string) $args['ns']);
             $response->getBody()->write(json_encode(['settings' => $settings], JSON_THROW_ON_ERROR));
             return $response->withHeader('Content-Type', 'application/json');
         });
@@ -162,7 +163,7 @@ final class Bootstrap
                 $response->getBody()->write(json_encode(['error' => 'settings (array) is required'], JSON_THROW_ON_ERROR));
                 return $response->withStatus(422)->withHeader('Content-Type', 'application/json');
             }
-            $store = $container->get(SettingsStore::class);
+            $store = $container->get(SettingsStoreContract::class);
             $ns = (string) $args['ns'];
             $written = 0;
             foreach ($items as $item) {
@@ -271,9 +272,10 @@ final class Bootstrap
             new DashboardLayoutRepository($c->get(PDO::class)));
 
         // Runtime settings store (namespaced key/value; secrets AES-256-GCM at
-        // rest under SETTINGS_ENCRYPTION_KEY). Extensions read it DB-first with an
-        // env fallback via the shared PDO + this store.
-        $container->set(SettingsStore::class, static fn ($c): SettingsStore =>
+        // rest under SETTINGS_ENCRYPTION_KEY). Bound by the CONTRACT interface key
+        // so modules resolve it the same way they resolve Mailer/UserContext, and
+        // read their own namespace DB-first with an env fallback.
+        $container->set(SettingsStoreContract::class, static fn ($c): SettingsStore =>
             new SettingsStore($c->get(PDO::class), self::env('SETTINGS_ENCRYPTION_KEY', '')));
 
         return $container;
