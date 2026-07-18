@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Tds\CorePanelApi;
 
+use Tds\Ext\Lexware\LexwareModule;
 use Tds\Ext\TimeTracker\TimeTrackerModule;
 use Tds\Panel\Contract\Module;
 
@@ -21,6 +22,7 @@ final class Modules
     {
         return [
             new TimeTrackerModule(),
+            new LexwareModule(),
         ];
     }
 }

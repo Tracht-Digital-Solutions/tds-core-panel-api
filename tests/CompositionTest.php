@@ -23,6 +23,7 @@ final class CompositionTest extends TestCase
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame('ok', $body['status']);
         self::assertContains('time-tracker', $body['modules']);
+        self::assertContains('lexware', $body['modules']);
     }
 
     public function testAdminPermissionsExposesMergedCatalog(): void
@@ -37,6 +38,7 @@ final class CompositionTest extends TestCase
             'id',
         );
         self::assertContains('time:read', $ids);
+        self::assertContains('lexware:read', $ids);
     }
 
     public function testModuleRouteIsMounted(): void
@@ -45,6 +47,17 @@ final class CompositionTest extends TestCase
         // UserContext — anonymous → 401 (a 404 would mean the route wasn't injected).
         $app = Bootstrap::createApp(dirname(__DIR__));
         $request = (new ServerRequestFactory())->createServerRequest('GET', '/time/summary');
+        $response = $app->handle($request);
+
+        self::assertSame(401, $response->getStatusCode());
+    }
+
+    public function testLexwareRouteIsMounted(): void
+    {
+        // The composed lexware module mounts /lexware/summary and gates it via
+        // the core UserContext — anonymous → 401 (404 would mean not injected).
+        $app = Bootstrap::createApp(dirname(__DIR__));
+        $request = (new ServerRequestFactory())->createServerRequest('GET', '/lexware/summary');
         $response = $app->handle($request);
 
         self::assertSame(401, $response->getStatusCode());
