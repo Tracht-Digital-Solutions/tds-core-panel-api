@@ -9,8 +9,25 @@ In-process composition, like the gateway: `Modules::enabled()` returns the
 extension `Module`s for this build; `Bootstrap` composes them through a
 `ModuleRegistry` (dependency-ordered, collision-checked) and mounts their routes.
 One PHP-FPM app, no service processes. The base ships the kernel routes
-(`/healthz`, `/admin/permissions`, `/wiki.json`, `/me/dashboard-layout`); it MUST
-boot with zero modules.
+(`/healthz`, `/admin/permissions`, `/wiki.json`, `/me/dashboard-layout`,
+`/admin/settings/{ns}`); it MUST boot with zero modules.
+
+## Runtime settings store
+
+`Service\SettingsStore` (bound in the container, resolvable by modules) is a
+namespaced key/value store so third-party config (DeepL keys, rebuild tokens, …)
+is panel-editable instead of `.env`-only. **Read pattern for consumers: DB-first
+with env fallback** — a non-empty stored value wins, else the env var, else a
+coded default. **Secrets are AES-256-GCM-encrypted at rest** under
+`SETTINGS_ENCRYPTION_KEY` (`v1:base64(iv|tag|cipher)`); the admin API
+(`GET`/`PUT /admin/settings/{ns}`, admin-only) returns only masked state
+(`configured` + `last4`), and a blank secret on save means "keep existing". The
+`app_setting` table (`namespace`×`skey`, `svalue`, `is_secret`) **self-bootstraps**
+(no migrator yet — same as the dashboard-layout table). Namespaces are per-extension
+(`blog-cms`, `website-cms`, …) so keys don't collide in the shared table. An
+extension adopts it by resolving `SettingsStore` from the container (or reading the
+shared `app_setting` table via the core PDO); the DeepL/rebuild env vars stay the
+fallback.
 
 ## Base-service data (per-user dashboard layout)
 

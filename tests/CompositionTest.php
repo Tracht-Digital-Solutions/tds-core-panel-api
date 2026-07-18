@@ -41,12 +41,13 @@ final class CompositionTest extends TestCase
 
     public function testModuleRouteIsMounted(): void
     {
+        // The composed time-tracker mounts /time/summary and gates it via the core
+        // UserContext — anonymous → 401 (a 404 would mean the route wasn't injected).
         $app = Bootstrap::createApp(dirname(__DIR__));
         $request = (new ServerRequestFactory())->createServerRequest('GET', '/time/summary');
         $response = $app->handle($request);
 
-        self::assertSame(200, $response->getStatusCode());
-        self::assertStringContainsString('weekHours', (string) $response->getBody());
+        self::assertSame(401, $response->getStatusCode());
     }
 
     public function testWikiJsonRequiresAdmin(): void

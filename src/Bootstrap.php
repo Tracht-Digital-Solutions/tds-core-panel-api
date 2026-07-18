@@ -19,6 +19,7 @@ use Tds\CorePanelApi\Domain\DashboardLayoutRepository;
 use Tds\CorePanelApi\Middleware\AuthMiddleware;
 use Tds\CorePanelApi\Middleware\CorsMiddleware;
 use Tds\CorePanelApi\Service\NullMailer;
+use Tds\CorePanelApi\Service\SettingsStore;
 use Tds\CorePanelApi\Service\SmtpMailer;
 use Tds\CorePanelApi\Support\AnonymousUserContext;
 use Tds\Panel\Contract\Mailer;
@@ -134,6 +135,57 @@ final class Bootstrap
             return $response->withHeader('Content-Type', 'application/json');
         });
 
+        // --- Runtime settings (admin) ------------------------------------------
+        // Masked read + write of a namespace's settings. Admin-only. A secret is
+        // returned only as configured/last4; a blank secret on save keeps the
+        // existing value (so the masked UI never has to round-trip the raw secret).
+        $app->get('/admin/settings/{ns:[a-z0-9-]+}', function (Request $request, Response $response, array $args) use ($container): Response {
+            $user = $container->get(UserContext::class);
+            if (!$user->isAuthenticated() || !$user->isAdmin()) {
+                $response->getBody()->write(json_encode(['error' => 'Forbidden'], JSON_THROW_ON_ERROR));
+                return $response->withStatus($user->isAuthenticated() ? 403 : 401)->withHeader('Content-Type', 'application/json');
+            }
+            $settings = $container->get(SettingsStore::class)->allMasked((string) $args['ns']);
+            $response->getBody()->write(json_encode(['settings' => $settings], JSON_THROW_ON_ERROR));
+            return $response->withHeader('Content-Type', 'application/json');
+        });
+
+        $app->put('/admin/settings/{ns:[a-z0-9-]+}', function (Request $request, Response $response, array $args) use ($container): Response {
+            $user = $container->get(UserContext::class);
+            if (!$user->isAuthenticated() || !$user->isAdmin()) {
+                $response->getBody()->write(json_encode(['error' => 'Forbidden'], JSON_THROW_ON_ERROR));
+                return $response->withStatus($user->isAuthenticated() ? 403 : 401)->withHeader('Content-Type', 'application/json');
+            }
+            $body = (array) $request->getParsedBody();
+            $items = is_array($body['settings'] ?? null) ? $body['settings'] : null;
+            if ($items === null) {
+                $response->getBody()->write(json_encode(['error' => 'settings (array) is required'], JSON_THROW_ON_ERROR));
+                return $response->withStatus(422)->withHeader('Content-Type', 'application/json');
+            }
+            $store = $container->get(SettingsStore::class);
+            $ns = (string) $args['ns'];
+            $written = 0;
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                $key = trim((string) ($item['key'] ?? ''));
+                if (preg_match('/^[a-z0-9_]{1,96}$/', $key) !== 1) {
+                    continue;
+                }
+                $secret = (bool) ($item['secret'] ?? false);
+                $value = (string) ($item['value'] ?? '');
+                // A blank secret means "keep existing" — skip the write.
+                if ($secret && $value === '') {
+                    continue;
+                }
+                $store->set($ns, $key, $value, $secret);
+                $written++;
+            }
+            $response->getBody()->write(json_encode(['ok' => true, 'written' => $written], JSON_THROW_ON_ERROR));
+            return $response->withHeader('Content-Type', 'application/json');
+        });
+
         // In-panel API wiki: the full route map of the base + every composed
         // module, introspected from the registered Slim routes at request time
         // (so all modules are present). Admin-only; the panel Wiki page renders
@@ -217,6 +269,12 @@ final class Bootstrap
         // Base-service per-user dashboard layout store (lazy — no DB on boot).
         $container->set(DashboardLayoutRepository::class, static fn ($c): DashboardLayoutRepository =>
             new DashboardLayoutRepository($c->get(PDO::class)));
+
+        // Runtime settings store (namespaced key/value; secrets AES-256-GCM at
+        // rest under SETTINGS_ENCRYPTION_KEY). Extensions read it DB-first with an
+        // env fallback via the shared PDO + this store.
+        $container->set(SettingsStore::class, static fn ($c): SettingsStore =>
+            new SettingsStore($c->get(PDO::class), self::env('SETTINGS_ENCRYPTION_KEY', '')));
 
         return $container;
     }
