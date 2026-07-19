@@ -24,6 +24,7 @@ final class CompositionTest extends TestCase
         self::assertSame('ok', $body['status']);
         self::assertContains('time-tracker', $body['modules']);
         self::assertContains('lexware', $body['modules']);
+        self::assertContains('customers', $body['modules']);
     }
 
     public function testAdminPermissionsExposesMergedCatalog(): void
@@ -39,6 +40,7 @@ final class CompositionTest extends TestCase
         );
         self::assertContains('time:read', $ids);
         self::assertContains('lexware:read', $ids);
+        self::assertContains('customers:read', $ids);
     }
 
     public function testModuleRouteIsMounted(): void
@@ -61,6 +63,13 @@ final class CompositionTest extends TestCase
         $response = $app->handle($request);
 
         self::assertSame(401, $response->getStatusCode());
+    }
+
+    public function testCustomersRouteIsMounted(): void
+    {
+        $app = Bootstrap::createApp(dirname(__DIR__));
+        $request = (new ServerRequestFactory())->createServerRequest('GET', '/customers/summary');
+        self::assertSame(401, $app->handle($request)->getStatusCode());
     }
 
     public function testWikiJsonRequiresAdmin(): void

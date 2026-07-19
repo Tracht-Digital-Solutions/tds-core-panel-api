@@ -13,6 +13,7 @@
     "slim/psr7": "^1.6",
     "slim/slim": "^4.13",
     "symfony/mailer": "^6.4",
+    "tracht-digital-solutions/tds-ext-customers": "*",
     "tracht-digital-solutions/tds-ext-lexware": "*",
     "tracht-digital-solutions/tds-ext-time-tracker": "*",
     "tracht-digital-solutions/tds-panel-contract": "^1.0.0",
@@ -33,6 +34,10 @@
     {
       "type": "path",
       "url": "../tds-ext-lexware"
+    },
+    {
+      "type": "path",
+      "url": "../tds-ext-customers"
     }
   ],
   "autoload": {
