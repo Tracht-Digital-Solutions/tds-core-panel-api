@@ -22,6 +22,7 @@ use Tds\CorePanelApi\Service\NullMailer;
 use Tds\CorePanelApi\Service\SettingsStore;
 use Tds\CorePanelApi\Service\SmtpMailer;
 use Tds\CorePanelApi\Support\AnonymousUserContext;
+use Tds\CorePanelApi\Support\MigrationRunner;
 use Tds\Panel\Contract\Mailer;
 use Tds\Panel\Contract\ModuleRegistry;
 use Tds\Panel\Contract\SettingsStore as SettingsStoreContract;
@@ -66,6 +67,11 @@ final class Bootstrap
         // key throws when the catalog is read below.
         $registry = new ModuleRegistry(Modules::enabled());
         $registry->registerAll($app);
+
+        // In-process auto-migrate: on the first request after a deploy, apply
+        // every enabled extension's pending migrations (no proc_open/cron on the
+        // prod host). No-op in tests/boot (no DB) and cheap once applied (marker).
+        self::autoMigrate($rootDir, $registry);
 
         // --- Base kernel routes -------------------------------------------------
         $app->get('/healthz', function (Request $request, Response $response) use ($registry): Response {
@@ -301,14 +307,38 @@ final class Bootstrap
 
     /**
      * All enabled modules' Phinx migration directories, for the in-process
-     * auto-migrator (ported next). Exposed so the migration runner can consume
-     * it without rebuilding the registry.
+     * auto-migrator. Exposed so a caller can consume it without rebuilding the
+     * registry.
      *
      * @return string[]
      */
     public static function migrationPaths(): array
     {
         return (new ModuleRegistry(Modules::enabled()))->migrationPaths();
+    }
+
+    /**
+     * Run the in-process auto-migrator. Gated so it is a true no-op when no DB is
+     * configured (unit tests / cold boot) or when explicitly disabled
+     * (`AUTO_MIGRATE=0`); otherwise it applies pending migrations once per
+     * deployed migration-set (see {@see MigrationRunner}).
+     */
+    private static function autoMigrate(string $rootDir, ModuleRegistry $registry): void
+    {
+        if (self::env('DB_NAME', '') === '' || self::env('AUTO_MIGRATE', '1') === '0') {
+            return;
+        }
+        (new MigrationRunner(
+            $registry->migrationPaths(),
+            [
+                'host' => self::env('DB_HOST', '127.0.0.1'),
+                'port' => self::env('DB_PORT', '3306'),
+                'name' => self::env('DB_NAME', ''),
+                'user' => self::env('DB_USER', ''),
+                'pass' => self::env('DB_PASS', ''),
+            ],
+            $rootDir . '/var/migrate',
+        ))->ensureMigrated();
     }
 
     /**

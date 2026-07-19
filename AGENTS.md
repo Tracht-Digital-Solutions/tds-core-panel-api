@@ -52,7 +52,19 @@ lands, move that DDL into a base migration and drop `ensureSchema()`.
   "0"/""). See `Bootstrap::env()`.
 - **Migration class names must be globally unique** across every module (the
   in-process auto-migrator includes them all into one process). Each extension
-  prefixes with its module id; the base only aggregates the paths.
+  prefixes with its module id; the base only aggregates the paths. **Migration
+  *versions* (the numeric filename prefix) must also be unique across extensions**
+  — they share ONE `phinxlog`, so a duplicate version makes Phinx throw.
+- **In-process auto-migrator (`Support/MigrationRunner`).** On the first request
+  after a deploy, `Bootstrap::autoMigrate()` applies every enabled extension's
+  pending migrations via Phinx's PHP `Manager` (no `proc_open`/cron/CLI php — the
+  prod host has none), over all `registry->migrationPaths()` into one `phinxlog`.
+  A signature-keyed marker + non-blocking `flock` make it a cheap single-flight
+  no-op after the first run; a class-name collision or failure is logged and
+  swallowed (never fatal), and a failure isn't marked done so it retries. **Gated
+  off when `DB_NAME` is empty (tests/boot) or `AUTO_MIGRATE=0`.** Base self-
+  bootstrap tables (`app_setting`, `user_dashboard_layout`) still use their own
+  `ensureSchema()` — move them to base migrations here when convenient.
 - **`php -S` needs `public/router.php`** (built-in server 404s dotted paths).
 
 ## Core services for modules
@@ -85,12 +97,12 @@ throws on a duplicate id / missing dep / cycle / duplicate permission key.
 
 ## Not done yet (next)
 
-User management + RS256 JWT/JWKS (port from tds-auth-api), wiki, email, the
-in-process auto-migrator (consume `Bootstrap::migrationPaths()`), the runtime
-settings store, and the assemble/deploy pipeline (bundle base + enabled extension
-repos, like the gateway's `_assemble.yml`). CI is deferred until the
-cross-repo-dep resolution (published packages vs. bundle) is designed and the
-org's GitHub Packages billing is restored.
+The **assemble/deploy pipeline** (bundle base + enabled extension repos into a
+self-contained artifact, like the gateway's `_assemble.yml`, + a deploy webhook)
+is the remaining half of the deployment story — the in-process auto-migrator
+(above) is done, so once the bundle deploys, the schema comes up on its own. CI
+is deferred until the cross-repo-dep resolution (published packages vs. bundled
+`vendor/`) is designed. Tracked in issues #1 (pipeline) / #2 (cutover).
 
 ## After a change
 
