@@ -7,6 +7,7 @@ use Tds\Ext\Billing\BillingModule;
 use Tds\Ext\Customers\CustomersModule;
 use Tds\Ext\Lexware\LexwareModule;
 use Tds\Ext\TimeTracker\TimeTrackerModule;
+use Tds\Ext\Tools\ToolsModule;
 use Tds\Panel\Contract\Module;
 
 /**
@@ -27,6 +28,7 @@ final class Modules
             new CustomersModule(),
             new BillingModule(),
             new LexwareModule(),
+            new ToolsModule(),
         ];
     }
 }

@@ -17,6 +17,7 @@
     "tracht-digital-solutions/tds-ext-customers": "*",
     "tracht-digital-solutions/tds-ext-lexware": "*",
     "tracht-digital-solutions/tds-ext-time-tracker": "*",
+    "tracht-digital-solutions/tds-ext-tools": "*",
     "tracht-digital-solutions/tds-panel-contract": "^1.0.0",
     "vlucas/phpdotenv": "^5.6"
   },
@@ -43,6 +44,10 @@
     {
       "type": "path",
       "url": "../tds-ext-billing"
+    },
+    {
+      "type": "path",
+      "url": "../tds-ext-tools"
     }
   ],
   "autoload": {
