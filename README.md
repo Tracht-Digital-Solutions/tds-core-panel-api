@@ -1,8 +1,8 @@
 # tds-core-panel-api
 
 The **base panel API kernel** (PHP 8 + Slim) — the backend twin of
-`tds-core-panel-frontend`. It composes enabled extension **Modules** in-process
-via `tds-panel-contract` into one app (the same "one PHP-FPM app, no service
+`tds-core-frontend-pkg`. It composes enabled extension **Modules** in-process
+via `tds-panel-contract-pkg` into one app (the same "one PHP-FPM app, no service
 processes" model the gateway already uses), and ships the base kernel routes.
 
 ## What it does

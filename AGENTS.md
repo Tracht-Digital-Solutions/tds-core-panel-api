@@ -1,6 +1,6 @@
 # AGENTS.md — tds-core-panel-api
 
-The base panel API kernel. Read `tds-panel-contract`'s AGENTS.md first — this
+The base panel API kernel. Read `tds-panel-contract-pkg`'s AGENTS.md first — this
 repo consumes that contract's PHP half (`Module` + `ModuleRegistry`).
 
 ## Model
