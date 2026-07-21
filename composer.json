@@ -3,7 +3,7 @@
   "description": "Base panel API kernel (PHP 8 + Slim). Composes extension Modules in-process via panel-contract into one app — the backend twin of core-panel-frontend.",
   "type": "project",
   "license": "proprietary",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "require": {
     "php": ">=8.1",
     "firebase/php-jwt": "^7.0",
