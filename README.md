@@ -32,13 +32,18 @@ paths without it).
 
 ## Status
 
-Skeleton that **validates backend composition end-to-end** (health lists the
-composed module, the merged permission catalog resolves, a module route is
-mounted, and the CORS preflight is answered — see `tests/`). Still to port from
-`tds-auth-api` + `tds-admin`: user management + RS256 JWT/JWKS, the wiki, email,
-the in-process auto-migrator, the runtime settings store, and the assemble/deploy
-pipeline (which bundles base + enabled extension repos, like the gateway).
+**Composes all 12 extensions and is deployed via the gateway** (cut over 2026-07-22).
+`Modules::enabled()` returns the union both products need — time-tracker, customers,
+billing, lexware, tools, messages, projects, documents, support-tickets, contact-tickets,
+website-cms, blog-cms. Ported and live: RS256 JWT/JWKS verify, the wiki (`/wiki.json`),
+email (`Mailer`), the in-process auto-migrator, the runtime settings store, per-user
+dashboard layout, and the **public content-delivery read surface** (`/content/blog*`,
+`/content/topics`, `/content/snippets`, `/content/landing`) the public blog/landingpage
+build-fetch. `tests/CompositionTest` validates it end-to-end (all 12 mount; public routes
+are unauthenticated; 40 tests green).
 
-CI is intentionally not wired yet: cross-repo module deps resolve via local path
-repos today; the published-package / bundle-assembly path is blocked on the org's
-GitHub Packages billing and needs the deploy design (see AGENTS.md).
+**Deployment:** this repo has **no CI of its own** — it is bundled as the `frontend`
+service by `tds-gateway-api`'s `_assemble.yml` (which checks out this repo + all 12
+extension repos and mirrors their Composer `path` packages into `vendor/`). The gateway
+routes everything except `/auth` + `/customer` here. Local dev resolves the extensions via
+`path` repos; local phpunit is the gate.
