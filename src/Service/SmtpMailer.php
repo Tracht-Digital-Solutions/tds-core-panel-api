@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Service;
+namespace Tds\CoreFrontendApi\Service;
 
 use Symfony\Component\Mailer\MailerInterface as SymfonyMailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email as MimeEmail;
-use Tds\Panel\Contract\Email;
-use Tds\Panel\Contract\Mailer;
+use Tds\Frontend\Contract\Email;
+use Tds\Frontend\Contract\Mailer;
 
 /**
  * The core's SMTP {@see Mailer}, backed by Symfony Mailer. Owns the From

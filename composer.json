@@ -1,6 +1,6 @@
 {
-  "name": "tracht-digital-solutions/tds-core-panel-api",
-  "description": "Base panel API kernel (PHP 8 + Slim). Composes extension Modules in-process via panel-contract into one app — the backend twin of core-panel-frontend.",
+  "name": "tracht-digital-solutions/tds-core-frontend-api",
+  "description": "Base panel API kernel (PHP 8 + Slim). Composes extension Modules in-process via frontend-contract into one app — the backend twin of core-frontend.",
   "type": "project",
   "license": "proprietary",
   "version": "0.8.1",
@@ -18,7 +18,7 @@
     "tracht-digital-solutions/tds-ext-lexware": "*",
     "tracht-digital-solutions/tds-ext-time-tracker": "*",
     "tracht-digital-solutions/tds-ext-tools": "*",
-    "tracht-digital-solutions/tds-panel-contract": "^1.0.0",
+    "tracht-digital-solutions/tds-frontend-contract": "^1.0.0",
     "vlucas/phpdotenv": "^5.6"
   },
   "require-dev": {
@@ -27,7 +27,7 @@
   "repositories": [
     {
       "type": "path",
-      "url": "../tds-panel-contract"
+      "url": "../tds-frontend-contract"
     },
     {
       "type": "path",
@@ -52,12 +52,12 @@
   ],
   "autoload": {
     "psr-4": {
-      "Tds\\CorePanelApi\\": "src/"
+      "Tds\\CoreFrontendApi\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Tds\\CorePanelApi\\Tests\\": "tests/"
+      "Tds\\CoreFrontendApi\\Tests\\": "tests/"
     }
   },
   "config": {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi;
+namespace Tds\CoreFrontendApi;
 
 use DI\Container;
 use Dotenv\Dotenv;
@@ -13,25 +13,25 @@ use Slim\App;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\Transport;
-use Tds\CorePanelApi\Auth\JwksClient;
-use Tds\CorePanelApi\Auth\TokenVerifier;
-use Tds\CorePanelApi\Domain\DashboardLayoutRepository;
-use Tds\CorePanelApi\Middleware\AuthMiddleware;
-use Tds\CorePanelApi\Middleware\CorsMiddleware;
-use Tds\CorePanelApi\Service\NullMailer;
-use Tds\CorePanelApi\Service\SettingsStore;
-use Tds\CorePanelApi\Service\SmtpMailer;
-use Tds\CorePanelApi\Support\AnonymousUserContext;
-use Tds\CorePanelApi\Support\MigrationRunner;
-use Tds\Panel\Contract\Mailer;
-use Tds\Panel\Contract\ModuleRegistry;
-use Tds\Panel\Contract\SettingsStore as SettingsStoreContract;
-use Tds\Panel\Contract\UserContext;
+use Tds\CoreFrontendApi\Auth\JwksClient;
+use Tds\CoreFrontendApi\Auth\TokenVerifier;
+use Tds\CoreFrontendApi\Domain\DashboardLayoutRepository;
+use Tds\CoreFrontendApi\Middleware\AuthMiddleware;
+use Tds\CoreFrontendApi\Middleware\CorsMiddleware;
+use Tds\CoreFrontendApi\Service\NullMailer;
+use Tds\CoreFrontendApi\Service\SettingsStore;
+use Tds\CoreFrontendApi\Service\SmtpMailer;
+use Tds\CoreFrontendApi\Support\AnonymousUserContext;
+use Tds\CoreFrontendApi\Support\MigrationRunner;
+use Tds\Frontend\Contract\Mailer;
+use Tds\Frontend\Contract\ModuleRegistry;
+use Tds\Frontend\Contract\SettingsStore as SettingsStoreContract;
+use Tds\Frontend\Contract\UserContext;
 
 /**
  * Wires the base panel API: env, Slim app, middleware, base routes, and the
- * composition of enabled extension Modules (in-process, via panel-contract's
- * ModuleRegistry) — the backend twin of core-panel-frontend's panelHost.
+ * composition of enabled extension Modules (in-process, via frontend-contract's
+ * ModuleRegistry) — the backend twin of core-frontend's frontendHost.
  *
  * The base ships only the kernel routes here (/healthz, /admin/permissions);
  * user management, wiki, email etc. are ported in next. It MUST boot with zero

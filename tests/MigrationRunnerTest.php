@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Tests;
+namespace Tds\CoreFrontendApi\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tds\CorePanelApi\Support\MigrationRunner;
+use Tds\CoreFrontendApi\Support\MigrationRunner;
 
 /**
  * DB-free coverage of the auto-migrator's control flow — the marker/single-flight

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Auth;
+namespace Tds\CoreFrontendApi\Auth;
 
 /**
  * Verifies an RS256 JWT and returns its claims. Implemented by {@see JwksClient}

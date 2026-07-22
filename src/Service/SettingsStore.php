@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Service;
+namespace Tds\CoreFrontendApi\Service;
 
 use PDO;
-use Tds\Panel\Contract\SettingsStore as SettingsStoreContract;
+use Tds\Frontend\Contract\SettingsStore as SettingsStoreContract;
 
 /**
  * Runtime settings store — a generic namespaced key/value table so third-party

@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Middleware;
+namespace Tds\CoreFrontendApi\Middleware;
 
 use DI\Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Tds\CorePanelApi\Auth\TokenVerifier;
-use Tds\CorePanelApi\Support\AnonymousUserContext;
-use Tds\CorePanelApi\Support\JwtUserContext;
-use Tds\Panel\Contract\UserContext;
+use Tds\CoreFrontendApi\Auth\TokenVerifier;
+use Tds\CoreFrontendApi\Support\AnonymousUserContext;
+use Tds\CoreFrontendApi\Support\JwtUserContext;
+use Tds\Frontend\Contract\UserContext;
 
 /**
  * Populates the request principal for every request, then hands off. It does

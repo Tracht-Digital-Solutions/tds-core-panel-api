@@ -1,6 +1,6 @@
-# AGENTS.md — tds-core-panel-api
+# AGENTS.md — tds-core-frontend-api
 
-The base panel API kernel. Read `tds-panel-contract-pkg`'s AGENTS.md first — this
+The base frontend API kernel. Read `tds-frontend-contract-pkg`'s AGENTS.md first — this
 repo consumes that contract's PHP half (`Module` + `ModuleRegistry`).
 
 ## Model
@@ -16,7 +16,7 @@ One PHP-FPM app, no service processes. The base ships the kernel routes
 
 `Service\SettingsStore` (bound in the container, resolvable by modules via the contract `SettingsStore` interface) is a
 namespaced key/value store so third-party config (DeepL keys, rebuild tokens, …)
-is panel-editable instead of `.env`-only. **Read pattern for consumers: DB-first
+is frontend-editable instead of `.env`-only. **Read pattern for consumers: DB-first
 with env fallback** — a non-empty stored value wins, else the env var, else a
 coded default. **Secrets are AES-256-GCM-encrypted at rest** under
 `SETTINGS_ENCRYPTION_KEY` (`v1:base64(iv|tag|cipher)`); the admin API
@@ -72,10 +72,10 @@ lands, move that DDL into a base migration and drop `ensureSchema()`.
 `Bootstrap::container()` binds the services extensions resolve via
 `$app->getContainer()->get(...)` — all lazy (boot does no DB/SMTP work):
 - **`PDO`** — the shared DB connection (env `DB_*`).
-- **`Mailer`** (panel-contract) — SMTP via Symfony Mailer when `MAIL_DSN` is set,
+- **`Mailer`** (frontend-contract) — SMTP via Symfony Mailer when `MAIL_DSN` is set,
   else `NullMailer` (`isConfigured()` false). From identity is core-owned
   (`MAIL_FROM`/`MAIL_FROM_NAME`); no extension configures its own SMTP.
-- **`UserContext`** (panel-contract) — the request principal, populated by
+- **`UserContext`** (frontend-contract) — the request principal, populated by
   `AuthMiddleware` from the verified RS256 JWT (`Auth\JwksClient` against
   tds-auth-api's JWKS). Maps admin/uid + the multi-company claims + the
   `X-Act-As-Customer` header to `isAdmin`/`userId`/`permissions`/`activeCompanyId`

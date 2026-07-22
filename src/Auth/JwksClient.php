@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Auth;
+namespace Tds\CoreFrontendApi\Auth;
 
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;

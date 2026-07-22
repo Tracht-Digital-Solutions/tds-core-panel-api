@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use Tds\CorePanelApi\Bootstrap;
+use Tds\CoreFrontendApi\Bootstrap;
 
 require __DIR__ . '/../vendor/autoload.php';
 

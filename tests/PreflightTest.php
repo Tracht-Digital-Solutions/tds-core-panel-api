@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Tests;
+namespace Tds\CoreFrontendApi\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ServerRequestFactory;
-use Tds\CorePanelApi\Bootstrap;
+use Tds\CoreFrontendApi\Bootstrap;
 
 /**
  * Regression guard for the Slim LIFO CORS ordering trap. An OPTIONS preflight

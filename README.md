@@ -1,8 +1,8 @@
-# tds-core-panel-api
+# tds-core-frontend-api
 
-The **base panel API kernel** (PHP 8 + Slim) — the backend twin of
+The **base frontend API kernel** (PHP 8 + Slim) — the backend twin of
 `tds-core-frontend-pkg`. It composes enabled extension **Modules** in-process
-via `tds-panel-contract-pkg` into one app (the same "one PHP-FPM app, no service
+via `tds-frontend-contract-pkg` into one app (the same "one PHP-FPM app, no service
 processes" model the gateway already uses), and ships the base kernel routes.
 
 ## What it does
@@ -22,7 +22,7 @@ customer API targets differ only in what `Modules::enabled()` returns.
 ## Develop
 
 ```bash
-composer install     # path repos → ../tds-panel-contract, ../tds-ext-time-tracker
+composer install     # path repos → ../tds-frontend-contract, ../tds-ext-time-tracker
 composer start        # php -S localhost:8100 -t public public/router.php
 composer test         # phpunit
 ```

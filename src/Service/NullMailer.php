@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Service;
+namespace Tds\CoreFrontendApi\Service;
 
-use Tds\Panel\Contract\Email;
-use Tds\Panel\Contract\Mailer;
+use Tds\Frontend\Contract\Email;
+use Tds\Frontend\Contract\Mailer;
 
 /**
  * No-op {@see Mailer} bound when the base has no SMTP configured. Lets a module

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Support;
+namespace Tds\CoreFrontendApi\Support;
 
 use Phinx\Config\Config;
 use Phinx\Migration\Manager;
@@ -24,7 +24,7 @@ use Throwable;
  *
  * Unlike the gateway (one bundle, N services × N databases), the panel API is
  * ONE app over ONE database: every extension contributes migration dirs via
- * {@see \Tds\Panel\Contract\ModuleRegistry::migrationPaths()} and they all share
+ * {@see \Tds\Frontend\Contract\ModuleRegistry::migrationPaths()} and they all share
  * a single `phinxlog`, applied in version order by one Manager run.
  *
  * Safety properties (mirrors the gateway runner):

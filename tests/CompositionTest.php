@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Tests;
+namespace Tds\CoreFrontendApi\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ServerRequestFactory;
-use Tds\CorePanelApi\Bootstrap;
+use Tds\CoreFrontendApi\Bootstrap;
 
 /**
  * Composition end-to-end through the REAL app: the base boots, composes the

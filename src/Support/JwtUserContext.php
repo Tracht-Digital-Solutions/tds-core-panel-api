@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Support;
+namespace Tds\CoreFrontendApi\Support;
 
-use Tds\Panel\Contract\UserContext;
+use Tds\Frontend\Contract\UserContext;
 
 /**
  * A {@see UserContext} built from verified JWT claims + the `X-Act-As-Customer`

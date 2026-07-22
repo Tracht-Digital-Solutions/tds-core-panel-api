@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi;
+namespace Tds\CoreFrontendApi;
 
 use Tds\Ext\Billing\BillingModule;
 use Tds\Ext\Customers\CustomersModule;
 use Tds\Ext\Lexware\LexwareModule;
 use Tds\Ext\TimeTracker\TimeTrackerModule;
 use Tds\Ext\Tools\ToolsModule;
-use Tds\Panel\Contract\Module;
+use Tds\Frontend\Contract\Module;
 
 /**
  * The enabled-module list for THIS API build — the backend twin of the

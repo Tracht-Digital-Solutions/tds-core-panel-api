@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Domain;
+namespace Tds\CoreFrontendApi\Domain;
 
 use PDO;
 

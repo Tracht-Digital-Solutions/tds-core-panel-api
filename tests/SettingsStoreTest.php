@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Tests;
+namespace Tds\CoreFrontendApi\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ServerRequestFactory;
-use Tds\CorePanelApi\Bootstrap;
-use Tds\CorePanelApi\Service\SettingsStore;
+use Tds\CoreFrontendApi\Bootstrap;
+use Tds\CoreFrontendApi\Service\SettingsStore;
 
 /**
  * Crypto round-trip (no DB) + admin-route gating through the REAL app. The

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Tests;
+namespace Tds\CoreFrontendApi\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tds\CorePanelApi\Support\JwtUserContext;
+use Tds\CoreFrontendApi\Support\JwtUserContext;
 
 /**
  * Claim → principal mapping (the logic the four services duplicated), without a

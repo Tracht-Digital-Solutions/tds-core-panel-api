@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Tests;
+namespace Tds\CoreFrontendApi\Tests;
 
 use DI\Container;
 use PHPUnit\Framework\TestCase;
@@ -10,10 +10,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
-use Tds\CorePanelApi\Auth\TokenVerifier;
-use Tds\CorePanelApi\Middleware\AuthMiddleware;
-use Tds\CorePanelApi\Support\AnonymousUserContext;
-use Tds\Panel\Contract\UserContext;
+use Tds\CoreFrontendApi\Auth\TokenVerifier;
+use Tds\CoreFrontendApi\Middleware\AuthMiddleware;
+use Tds\CoreFrontendApi\Support\AnonymousUserContext;
+use Tds\Frontend\Contract\UserContext;
 
 /**
  * AuthMiddleware populates the container's UserContext each request (Jwt when a

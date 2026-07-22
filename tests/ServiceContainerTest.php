@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Tds\CorePanelApi\Tests;
+namespace Tds\CoreFrontendApi\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tds\CorePanelApi\Bootstrap;
-use Tds\Panel\Contract\Mailer;
-use Tds\Panel\Contract\UserContext;
+use Tds\CoreFrontendApi\Bootstrap;
+use Tds\Frontend\Contract\Mailer;
+use Tds\Frontend\Contract\UserContext;
 
 /**
  * The core services extensions resolve from the app container. Verifies the
