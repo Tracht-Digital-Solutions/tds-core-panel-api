@@ -3,7 +3,7 @@
   "description": "Base panel API kernel (PHP 8 + Slim). Composes extension Modules in-process via frontend-contract into one app — the backend twin of core-frontend.",
   "type": "project",
   "license": "proprietary",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "require": {
     "php": ">=8.1",
     "firebase/php-jwt": "^7.0",
@@ -15,7 +15,10 @@
     "symfony/mailer": "^6.4",
     "tracht-digital-solutions/tds-ext-billing": "*",
     "tracht-digital-solutions/tds-ext-customers": "*",
+    "tracht-digital-solutions/tds-ext-documents": "*",
     "tracht-digital-solutions/tds-ext-lexware": "*",
+    "tracht-digital-solutions/tds-ext-messages": "*",
+    "tracht-digital-solutions/tds-ext-projects": "*",
     "tracht-digital-solutions/tds-ext-time-tracker": "*",
     "tracht-digital-solutions/tds-ext-tools": "*",
     "tracht-digital-solutions/tds-frontend-contract": "^1.0.0",
@@ -25,30 +28,15 @@
     "phpunit/phpunit": "^10.5"
   },
   "repositories": [
-    {
-      "type": "path",
-      "url": "../tds-frontend-contract"
-    },
-    {
-      "type": "path",
-      "url": "../tds-ext-time-tracker"
-    },
-    {
-      "type": "path",
-      "url": "../tds-ext-lexware"
-    },
-    {
-      "type": "path",
-      "url": "../tds-ext-customers"
-    },
-    {
-      "type": "path",
-      "url": "../tds-ext-billing"
-    },
-    {
-      "type": "path",
-      "url": "../tds-ext-tools"
-    }
+    { "type": "path", "url": "../tds-frontend-contract-pkg" },
+    { "type": "path", "url": "../tds-ext-time-tracker-pkg" },
+    { "type": "path", "url": "../tds-ext-lexware-pkg" },
+    { "type": "path", "url": "../tds-ext-customers-pkg" },
+    { "type": "path", "url": "../tds-ext-billing-pkg" },
+    { "type": "path", "url": "../tds-ext-tools-pkg" },
+    { "type": "path", "url": "../tds-ext-messages-pkg" },
+    { "type": "path", "url": "../tds-ext-projects-pkg" },
+    { "type": "path", "url": "../tds-ext-documents-pkg" }
   ],
   "autoload": {
     "psr-4": {

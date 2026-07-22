@@ -5,7 +5,10 @@ namespace Tds\CoreFrontendApi;
 
 use Tds\Ext\Billing\BillingModule;
 use Tds\Ext\Customers\CustomersModule;
+use Tds\Ext\Documents\DocumentsModule;
 use Tds\Ext\Lexware\LexwareModule;
+use Tds\Ext\Messages\MessagesModule;
+use Tds\Ext\Projects\ProjectsModule;
 use Tds\Ext\TimeTracker\TimeTrackerModule;
 use Tds\Ext\Tools\ToolsModule;
 use Tds\Frontend\Contract\Module;
@@ -29,6 +32,9 @@ final class Modules
             new BillingModule(),
             new LexwareModule(),
             new ToolsModule(),
+            new MessagesModule(),
+            new ProjectsModule(),
+            new DocumentsModule(),
         ];
     }
 }
