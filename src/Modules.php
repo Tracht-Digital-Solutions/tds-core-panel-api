@@ -4,13 +4,17 @@ declare(strict_types=1);
 namespace Tds\CoreFrontendApi;
 
 use Tds\Ext\Billing\BillingModule;
+use Tds\Ext\BlogCms\BlogCmsModule;
+use Tds\Ext\ContactTickets\ContactTicketsModule;
 use Tds\Ext\Customers\CustomersModule;
 use Tds\Ext\Documents\DocumentsModule;
 use Tds\Ext\Lexware\LexwareModule;
 use Tds\Ext\Messages\MessagesModule;
 use Tds\Ext\Projects\ProjectsModule;
+use Tds\Ext\SupportTickets\SupportTicketsModule;
 use Tds\Ext\TimeTracker\TimeTrackerModule;
 use Tds\Ext\Tools\ToolsModule;
+use Tds\Ext\WebsiteCms\WebsiteCmsModule;
 use Tds\Frontend\Contract\Module;
 
 /**
@@ -35,6 +39,10 @@ final class Modules
             new MessagesModule(),
             new ProjectsModule(),
             new DocumentsModule(),
+            new SupportTicketsModule(),
+            new ContactTicketsModule(),
+            new WebsiteCmsModule(),
+            new BlogCmsModule(),
         ];
     }
 }

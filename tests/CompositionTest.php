@@ -81,6 +81,34 @@ final class CompositionTest extends TestCase
         self::assertSame(401, $app->handle($request)->getStatusCode());
     }
 
+    /**
+     * The CMS + ticket modules moved off the archived content/contact backends
+     * into the composed API — their summary routes must be mounted (401 anon,
+     * not 404). This is what the gateway's catch-all + the public sites hit.
+     *
+     * @dataProvider composedSummaryRoutes
+     */
+    public function testComposedModuleRouteIsMounted(string $route): void
+    {
+        $app = Bootstrap::createApp(dirname(__DIR__));
+        $request = (new ServerRequestFactory())->createServerRequest('GET', $route);
+        self::assertSame(401, $app->handle($request)->getStatusCode());
+    }
+
+    public static function composedSummaryRoutes(): array
+    {
+        return [
+            'support-tickets' => ['/tickets/summary'],
+            'contact-tickets' => ['/contact/summary'],
+            'website-cms' => ['/cms/summary'],
+            'blog-cms' => ['/blog/summary'],
+            'messages' => ['/messages/summary'],
+            'projects' => ['/projects/summary'],
+            'documents' => ['/documents/summary'],
+            'tools' => ['/tools/summary'],
+        ];
+    }
+
     public function testWikiJsonRequiresAdmin(): void
     {
         // No token → anonymous → 401 (the admin route map is not public). The

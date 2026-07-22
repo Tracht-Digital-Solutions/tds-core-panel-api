@@ -12,6 +12,15 @@ One PHP-FPM app, no service processes. The base ships the kernel routes
 (`/healthz`, `/admin/permissions`, `/wiki.json`, `/me/dashboard-layout`,
 `/admin/settings/{ns}`); it MUST boot with zero modules.
 
+`Modules::enabled()` currently composes **all 12** extensions (the union both
+products need) so this single backend serves both the admin and customer
+frontends: time-tracker, customers, billing, lexware, tools, messages, projects,
+documents, **support-tickets** (`/tickets`, `/admin/tickets`), **contact-tickets**
+(`/contact`), **website-cms** (`/cms/*`), **blog-cms** (`/blogs/*`, `/blog/*`).
+The last four replaced the archived content/contact backends and serve the public
+blog/landingpage build-fetch + the admin CMS/ticket UIs; they were added once
+their migration version prefixes were made globally unique (see below).
+
 ## Runtime settings store
 
 `Service\SettingsStore` (bound in the container, resolvable by modules via the contract `SettingsStore` interface) is a
@@ -92,17 +101,30 @@ works without auth-api).
 ## Enabling a module
 
 Add `new SomeModule()` to `Modules::enabled()` and add the extension's Composer
-package (path repo for local dev; published/bundled for CI/deploy). The registry
-throws on a duplicate id / missing dep / cycle / duplicate permission key.
+package (path repo for local dev; the gateway's `_assemble.yml` checks out the
+sibling repo + mirrors it into `vendor/` for the bundle). The registry throws on
+a duplicate id / missing dep / cycle / duplicate permission key.
 
-## Not done yet (next)
+**Migration version prefixes must be globally unique across ALL composed modules.**
+Every module's migrations merge into ONE shared `phinxlog` here, and Phinx fatals
+on duplicate numeric versions (not just duplicate class names). Each module owns a
+distinct date band — time-tracker `20260713*`, lexware `20260719000*`, customers
+`20260719100*`, billing `20260719200*`, tools `20260720*`, messages/projects/
+documents `20260722*`, support-tickets `20260725*`, contact-tickets `20260726*`,
+website-cms `20260727*`, blog-cms `20260728*`. A new migration stays in its
+module's band. (The four CMS/ticket modules were renumbered off overlapping
+`20260714*`/`20260718*` prefixes when they were composed in.)
 
-The **assemble/deploy pipeline** (bundle base + enabled extension repos into a
-self-contained artifact, like the gateway's `_assemble.yml`, + a deploy webhook)
-is the remaining half of the deployment story — the in-process auto-migrator
-(above) is done, so once the bundle deploys, the schema comes up on its own. CI
-is deferred until the cross-repo-dep resolution (published packages vs. bundled
-`vendor/`) is designed. Tracked in issues #1 (pipeline) / #2 (cutover).
+## Deployment
+
+The **assemble/deploy pipeline is the gateway's** (`tds-gateway-api`
+`_assemble.yml`): it checks out this repo as the `frontend` service + all its
+extension repos, mirrors the Composer `path` packages into `vendor/`
+(`COMPOSER_MIRROR_PATH_REPOS=1`), and bundles it under `services/frontend/`. The
+gateway routes everything except `/auth` + `/customer` here (the default
+catch-all). This repo still has **no CI of its own** — local phpunit is the gate.
+The in-process auto-migrator (above) brings the schema up on the first request
+after deploy.
 
 ## After a change
 
