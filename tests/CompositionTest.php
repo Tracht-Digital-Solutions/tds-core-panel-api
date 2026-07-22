@@ -109,6 +109,42 @@ final class CompositionTest extends TestCase
         ];
     }
 
+    /**
+     * The public content-delivery routes (successors to the archived
+     * content-api's open read) are UNAUTHENTICATED — anonymous must NOT get 401.
+     * They degrade to an empty payload when the DB is unreachable (as here, no
+     * DB), which is exactly the build-fetch fail-safe, so they answer 200.
+     *
+     * @dataProvider publicContentRoutes
+     */
+    public function testPublicContentRouteIsUnauthenticated(string $route): void
+    {
+        $app = Bootstrap::createApp(dirname(__DIR__));
+        $request = (new ServerRequestFactory())->createServerRequest('GET', $route);
+        $status = $app->handle($request)->getStatusCode();
+        self::assertNotSame(401, $status, "$route must be public (not auth-gated)");
+        self::assertSame(200, $status, "$route should degrade to 200 empty with no DB");
+    }
+
+    public static function publicContentRoutes(): array
+    {
+        return [
+            'blog list' => ['/content/blog'],
+            'blog popular' => ['/content/blog/popular'],
+            'blog topics' => ['/content/topics'],
+            'blog snippets' => ['/content/snippets'],
+            'landing blocks' => ['/content/landing'],
+        ];
+    }
+
+    public function testPublicBlogPostMissingIs404NotAuth(): void
+    {
+        // A single-post read for an unknown slug is a public 404 (never 401).
+        $app = Bootstrap::createApp(dirname(__DIR__));
+        $request = (new ServerRequestFactory())->createServerRequest('GET', '/content/blog/does-not-exist');
+        self::assertSame(404, $app->handle($request)->getStatusCode());
+    }
+
     public function testWikiJsonRequiresAdmin(): void
     {
         // No token → anonymous → 401 (the admin route map is not public). The

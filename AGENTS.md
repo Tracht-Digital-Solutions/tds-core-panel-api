@@ -21,6 +21,16 @@ The last four replaced the archived content/contact backends and serve the publi
 blog/landingpage build-fetch + the admin CMS/ticket UIs; they were added once
 their migration version prefixes were made globally unique (see below).
 
+**Public content delivery** is the successor to tds-content-api's open read, served
+by two of those modules as their only UNAUTHENTICATED routes (`AuthMiddleware` is
+non-gating, so a route with no self-gate is public): blog-cms serves
+`/content/blog`, `/content/blog/popular`, `/content/blog/{slug}`, `/content/topics`,
+`/content/snippets`; website-cms serves `/content/landing`. Only published content
+leaks, and every one degrades to an empty payload on a DB error (build-fetch
+fail-safe). The public blog + landingpage SSG builds fetch these at build time
+through the gateway's catch-all — their existing `.../content` base URL is
+unchanged, so no frontend edit was needed.
+
 ## Runtime settings store
 
 `Service\SettingsStore` (bound in the container, resolvable by modules via the contract `SettingsStore` interface) is a
